@@ -122,22 +122,20 @@ port 8080 already allocated	              8080 ya en uso	docker ps        docker
 EvolAPI reinicia (P1000)	              Credenciales DB incorrectas	     Revisar .env y reiniciar EvolutionAPI
 permission denied /var/run/docker.sock 	  Usuario fuera del grupo docker	 sudo usermod -aG docker $USER && newgrp docker
 Error snap (ngrok)	LXC sin squashfs	  Instalar binario .tgz en /usr/local/bin
-
-Mantenimiento
-# Backup DB
+---
+# Mantenimiento
+## Backup DB
 docker exec postgres_db pg_dump -U postgres evolution > backups/evolution_$(date +%F).sql
 
-# Actualizar imágenes
+## Actualizar imágenes
 docker compose pull && docker compose up -d
 
-# Rotar API key
+## Rotar API key
 openssl rand -hex 32  # editar .env
 docker compose restart evolution_api
-Túneles y acceso seguro
+## Túneles y acceso seguro
 Crear túnel SSH (VM → Bastion → Contenedor)
-bash
-Copy
-Edit
+
 # Ejemplo: forward local 50000 → contenedor 22
 ssh -N -p 10224 \
     -L 127.0.0.1:50000:10.10.153.4:22 \
@@ -150,7 +148,7 @@ Portainer	50003	10.10.153.4:9000
 
 Cliente local → ssh -p 50000 kevin@localhost o http://localhost:50002.
 ---
-Alternativas
+# Alternativas
 Método	Ventaja	Nota
 Cloudflared	DNS *.trycloudflare.com	cloudflared tunnel create + YAML
 ngrok free	Fácil, 1 túnel simultáneo	subdominio cambia en cada restart
@@ -170,14 +168,14 @@ PGADMIN_DEFAULT_EMAIL=admin@local
 PGADMIN_DEFAULT_PASSWORD=<pass_pgadmin>
 Generar clave: openssl rand -hex 32
 ---
-Comandos útiles
-Acción	Comando
-Listar contenedores	docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-Logs EvolutionAPI	docker logs -f evolution_api
+# Comandos útiles
+Acción                   	Comando
+Listar contenedores 	docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+Logs EvolutionAPI	    docker logs -f evolution_api
 Entrar al contenedor	docker exec -it evolution_api sh
-Reiniciar Portainer	docker restart portainer
+Reiniciar Portainer	    docker restart portainer
 Reset credenciales N8N	docker stop n8n && docker rm n8n && rm -rf ./n8n_data && docker compose up -d n8n
-Métricas live	docker stats / htop
+Métricas live	        docker stats / htop
 ---
 Solución de problemas
 Síntoma	Causa	Fix
@@ -186,10 +184,7 @@ EvolAPI reinicia (P1000)	Credenciales DB incorrectas	Revisar .env y reiniciar Ev
 permission denied /var/run/docker.sock	Usuario fuera del grupo docker	sudo usermod -aG docker $USER && newgrp docker
 Error snap (ngrok)	LXC sin squashfs	Instalar binario .tgz en /usr/local/bin
 ---
-## Mantenimiento
-bash
-Copy
-Edit
+# Mantenimiento
 ## Backup DB
 docker exec postgres_db pg_dump -U postgres evolution > backups/evolution_$(date +%F).sql
 ---

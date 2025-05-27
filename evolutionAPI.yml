@@ -1,0 +1,232 @@
+version: "3.8"
+
+services:
+  # Servicio Redis
+  redis:
+    image: redis:latest
+    container_name: redis_service
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--port",
+        "6379"
+      ]
+    volumes:
+      - redis_data:/data
+    networks:
+      - rede_geral
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1024M
+    restart: always
+
+  # Servicio PostgreSQL
+  postgres:
+    image: postgres:14.13
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: (CONTRASEÑA_POSTGRES_AQUI)  # Cambiar por una contraseña segura
+    ports:
+      - "5432:5432"  # Puerto por defecto de PostgreSQL
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persistencia de datos
+    networks:
+      - rede_geral
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: "0.5"
+
+  # Servicio pgAdmin
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com          # Cambiar por tu correo
+      PGADMIN_DEFAULT_PASSWORD: (CONTRASEÑA_PGADMIN)  # Cambiar por una contraseña segura
+    ports:
+      - "5433:80"  # Puerto para acceder a pgAdmin
+    networks:
+      - rede_geral
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: "0.5"
+
+  # Servicio Evolution API
+  evolution_v2:
+    image: atendai/evolution-api:v2.1.1-homolog
+    container_name: evolution_v2
+    volumes:
+      - evolution_instancesv2:/evolution/instances  # Volumen para datos persistentes de Evolution
+    networks:
+      - rede_geral  # Usa la red general
+    ports:
+      - "8080:8080"  # Mapea el puerto 8080 del host al contenedor
+    restart: always
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      # URL de Evolution API
+      - SERVER_URL=http://localhost:8080
+
+      # Datos de Autenticación
+      - AUTHENTICATION_TYPE=apikey
+      - AUTHENTICATION_API_KEY=(TU APIKEY)
+      - AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES=true
+
+      # Configuraciones generales
+      - LANGUAGE=pt-BR
+      - CONFIG_SESSION_PHONE_CLIENT=InovaBoost
+      - CONFIG_SESSION_PHONE_NAME=chrome
+      - CONFIG_SESSION_PHONE_VERSION=2.3000.1015901307
+
+      # Configuraciones de WhatsApp Business Cloud (API Oficial)
+      - WA_BUSINESS_TOKEN_WEBHOOK=evolution
+      - WA_BUSINESS_URL=https://graph.facebook.com
+      - WA_BUSINESS_VERSION=v20.0
+      - WA_BUSINESS_LANGUAGE=pt_BR
+
+      # Configuraciones de QR Code
+      - QRCODE_LIMIT=1902
+      - QRCODE_COLOR=#000000
+
+      # Configuraciones de la Base de Datos PostgreSQL
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://postgres:(CONTRASEÑA_POSTGRES_AQUI)@postgres_db:5432/evolution
+      - DATABASE_CONNECTION_CLIENT_NAME=evolution
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_MESSAGE_UPDATE=true
+      - DATABASE_SAVE_DATA_CONTACTS=true
+      - DATABASE_SAVE_DATA_CHATS=true
+
+      # OpenAI (Desactivado)
+      - OPENAI_ENABLED=false
+
+      # Dify (Desactivado)
+      - DIFY_ENABLED=false
+
+      # Configuraciones de Almacenamiento MinIO/S3
+      - S3_ENABLED=false
+      - S3_ACCESS_KEY=
+      - S3_SECRET_KEY=
+      - S3_BUCKET=evolution
+      - S3_PORT=443
+      - S3_ENDPOINT=
+      - S3_USE_SSL=true
+
+      # Configuraciones de caché Redis
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://redis_service:6379/2
+      - CACHE_REDIS_PREFIX_KEY=evolution
+      - CACHE_REDIS_SAVE_INSTANCES=false
+      - CACHE_LOCAL_ENABLED=false
+
+      # Configuraciones de instancias
+      - DEL_INSTANCE=2
+      - DEL_TEMP_INSTANCES=false
+
+      # Configuración del módulo Typebot
+      - TYPEBOT_ENABLED=true
+      - TYPEBOT_API_VERSION=latest
+
+      # Configuración del módulo Chatwoot
+      - CHATWOOT_ENABLED=false
+      - CHATWOOT_MESSAGE_READ=true
+      - CHATWOOT_MESSAGE_DELETE=true
+      - CHATWOOT_IMPORT_DATABASE_CONNECTION_URI=postgresql://postgres:(CONTRASEÑA_POSTGRES_AQUI)@postgres_db:5432/chatwoot?sslmode=disable
+      - CHATWOOT_IMPORT_PLACEHOLDER_MEDIA_MESSAGE=false
+
+      # Configuración de RabbitMQ (Desactivado por defecto)
+      - RABBITMQ_ENABLED=false
+      - RABBITMQ_URI=amqp://admin:admin@rabbitmq:5672/default
+      - RABBITMQ_EXCHANGE_NAME=evolution
+      - RABBITMQ_GLOBAL_ENABLED=false
+      - RABBITMQ_EVENTS_APPLICATION_STARTUP=false
+      - RABBITMQ_EVENTS_INSTANCE_CREATE=false
+      - RABBITMQ_EVENTS_INSTANCE_DELETE=false
+      - RABBITMQ_EVENTS_QRCODE_UPDATED=false
+      - RABBITMQ_EVENTS_MESSAGES_SET=false
+      - RABBITMQ_EVENTS_MESSAGES_UPSERT=true
+      - RABBITMQ_EVENTS_MESSAGES_EDITED=false
+      - RABBITMQ_EVENTS_MESSAGES_UPDATE=false
+      - RABBITMQ_EVENTS_MESSAGES_DELETE=false
+      - RABBITMQ_EVENTS_SEND_MESSAGE=false
+      - RABBITMQ_EVENTS_CONTACTS_SET=false
+      - RABBITMQ_EVENTS_CONTACTS_UPSERT=false
+      - RABBITMQ_EVENTS_CONTACTS_UPDATE=false
+      - RABBITMQ_EVENTS_PRESENCE_UPDATE=false
+      - RABBITMQ_EVENTS_CHATS_SET=false
+      - RABBITMQ_EVENTS_CHATS_UPSERT=false
+      - RABBITMQ_EVENTS_CHATS_UPDATE=false
+      - RABBITMQ_EVENTS_CHATS_DELETE=false
+      - RABBITMQ_EVENTS_GROUPS_UPSERT=false
+      - RABBITMQ_EVENTS_GROUP_UPDATE=false
+      - RABBITMQ_EVENTS_GROUP_PARTICIPANTS_UPDATE=false
+      - RABBITMQ_EVENTS_CONNECTION_UPDATE=true
+      - RABBITMQ_EVENTS_CALL=false
+      - RABBITMQ_EVENTS_TYPEBOT_START=false
+      - RABBITMQ_EVENTS_TYPEBOT_CHANGE_STATUS=false
+
+      # Configuraciones de Webhooks
+      - WEBHOOK_GLOBAL_ENABLED=false
+      - WEBHOOK_GLOBAL_URL=
+      - WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS=false
+      - WEBHOOK_EVENTS_APPLICATION_STARTUP=false
+      - WEBHOOK_EVENTS_QRCODE_UPDATED=true
+      - WEBHOOK_EVENTS_MESSAGES_SET=true
+      - WEBHOOK_EVENTS_MESSAGES_UPSERT=true
+      - WEBHOOK_EVENTS_MESSAGES_EDITED=true
+      - WEBHOOK_EVENTS_MESSAGES_UPDATE=true
+      - WEBHOOK_EVENTS_MESSAGES_DELETE=true
+      - WEBHOOK_EVENTS_SEND_MESSAGE=true
+      - WEBHOOK_EVENTS_CONTACTS_SET=true
+      - WEBHOOK_EVENTS_CONTACTS_UPSERT=true
+      - WEBHOOK_EVENTS_CONTACTS_UPDATE=true
+      - WEBHOOK_EVENTS_PRESENCE_UPDATE=true
+      - WEBHOOK_EVENTS_CHATS_SET=true
+      - WEBHOOK_EVENTS_CHATS_UPSERT=true
+      - WEBHOOK_EVENTS_CHATS_UPDATE=true
+      - WEBHOOK_EVENTS_CHATS_DELETE=true
+      - WEBHOOK_EVENTS_GROUPS_UPSERT=true
+      - WEBHOOK_EVENTS_GROUPS_UPDATE=true
+      - WEBHOOK_EVENTS_GROUP_PARTICIPANTS_UPDATE=true
+      - WEBHOOK_EVENTS_CONNECTION_UPDATE=true
+      - WEBHOOK_EVENTS_LABELS_EDIT=true
+      - WEBHOOK_EVENTS_LABELS_ASSOCIATION=true
+      - WEBHOOK_EVENTS_CALL=true
+      - WEBHOOK_EVENTS_TYPEBOT_START=false
+      - WEBHOOK_EVENTS_TYPEBOT_CHANGE_STATUS=false
+      - WEBHOOK_EVENTS_ERRORS=false
+      - WEBHOOK_EVENTS_ERRORS_WEBHOOK=
+
+volumes:
+  redis_data:
+    external: false
+    name: redis_data
+  postgres_data:
+    external: false
+    name: postgres_data
+  evolution_instancesv2:
+    external: false
+    name: evolution_instancesv2
+
+networks:
+  rede_geral:
+    external: true
+    name: red_gral

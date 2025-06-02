@@ -47,7 +47,6 @@ servicios Dockerizados:
 
 | Capa | Componente | Descripción |
 |---|------------|-------------|
-<<<<<<< Better-documentation
 | 1 | **Modem Movistar** | Nateo ssh :10224 (ssh), :80 y 443 a Router Mkt |
 | 2 | **Router mikrotik** | Nateo ssh :10224 al Bastión, 80 y 443 al Nginx Proxy Manager |
 | 3 | **Proxmox Host** | Contiene LXC `kevin01` (`10.10.153.4`), container `bastión` y container `nginx-proxy-manager`|
@@ -56,11 +55,6 @@ servicios Dockerizados:
 | 5 | **Container Kevin01** | Container final, usuario kevin con privilegios |
 | 6 | **Docker Stack** | Adentro de kevin01. Servicios listados arriba sobre una red interna. |
 =======
-| 1 | **Hetzner 1 / Bastion** | Servidor Archlinux expuesto a Internet (`ssh :10224`). |
-| 2 | **VM kevin@perfeccion.ar** | Nodo intermediario donde se crean los túneles. |
-| 3 | **Proxmox Host** | Contiene LXC `kvn01` (`10.10.153.4`). |
-| 4 | **Docker Stack** | Servicios listados arriba sobre una red interna. |
->>>>>>> main
 
 ---
 
@@ -159,8 +153,6 @@ Métricas live	         docker stats / htop
 
 ```shell
 Síntoma	                                Causa	                                        Fix
-
-<<<<<<< Better-documentation
 port 8080 already allocated	            8080 ya en uso	docker ps       docker stop <ID>, cambiar puerto compose
 EvolAPI reinicia (P1000)	            Credenciales DB incorrectas     Revisar .env y reiniciar EvolutionAPI
 permission denied /var/run/docker.sock  Usuario fuera del grupo docker  sudo usermod -aG docker $USER && newgrp docker
@@ -190,7 +182,6 @@ ngrok free	Fácil, 1 túnel simultáneo	subdominio cambia en cada restart
 # Variables de entorno
 AUTHENTICATION_API_KEY=<clave_hex_64>
 TZ=America/Argentina/Buenos_Aires
->>>>>>> main
 
 ### Backup DB
 
@@ -209,8 +200,6 @@ TZ=America/Argentina/Buenos_Aires
 
 Crear túnel SSH (VM → Bastion → Contenedor)
 
-<<<<<<< Better-documentation
-=======
 PGADMIN_DEFAULT_EMAIL=admin@local
 PGADMIN_DEFAULT_PASSWORD=<pass_pgadmin>
 Generar clave: openssl rand -hex 32
@@ -241,7 +230,6 @@ docker compose pull && docker compose up -d
 ## Rotar API key
 openssl rand -hex 32  # editar .env
 docker compose restart evolution_api
->>>>>>> main
 ## Licencia
 
 MIT © Copyleft 2025 Bunker 4

@@ -54,7 +54,6 @@ servicios Dockerizados:
 | 4 | **Nginx-Proxy-Manager** | Container con Archlinux - Proxy Forward del 80 a Container Kevin01 |
 | 5 | **Container Kevin01** | Container final, usuario kevin con privilegios |
 | 6 | **Docker Stack** | Adentro de kevin01. Servicios listados arriba sobre una red interna. |
-=======
 
 ---
 

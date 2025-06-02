@@ -35,7 +35,7 @@ servicios Dockerizados:
 
 | # | Componente | Descripción |
 |---|------------|-------------|
-| 1 | **Hetzner 1 / Bastion** | Servidor Audialux expuesto a Internet (`ssh :10224`). |
+| 1 | **Hetzner 1 / Bastion** | Servidor Archlinux expuesto a Internet (`ssh :10224`). |
 | 2 | **VM kevin@perfeccion.ar** | Nodo intermediario donde se crean los túneles. |
 | 3 | **Proxmox Host** | Contiene LXC `kvn01` (`10.10.153.4`). |
 | 4 | **Docker Stack** | Servicios listados arriba sobre una red interna. |

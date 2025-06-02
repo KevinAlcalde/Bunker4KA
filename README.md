@@ -31,18 +31,18 @@ servicios Dockerizados:
 
 ## Arquitectura
 
-![Topología Bunker 4](docs/images/bunker4_topologia.png)
+![Tipología Bunker 4](docs/images/bunker4_topologia.png)
 
 | # | Componente | Descripción |
 |---|------------|-------------|
 | 1 | **Hetzner 1 / Bastion** | Servidor Audialux expuesto a Internet (`ssh :10224`). |
 | 2 | **VM kevin@perfeccion.ar** | Nodo intermediario donde se crean los túneles. |
-| 3 | **Proxmox Host** | Contiene LXC `kvm01` (`10.10.153.4`). |
+| 3 | **Proxmox Host** | Contiene LXC `kvn01` (`10.10.153.4`). |
 | 4 | **Docker Stack** | Servicios listados arriba sobre una red interna. |
 
 ---
 
-## Prerrequisitos
+## Prerequisitos
 
 | Recurso | Versión mínima |
 |---------|----------------|
